@@ -3,8 +3,14 @@ const ChatModel = require("../models/chatModel");
 const userModel = require("../models/userModel");
 //Creating new chat if sender and reciever new
 const createChat = async (req, res) => {
-  const test = await chatModel.findOne({ members: [req.body.senderId, req.body.receiverId] });
-  if (test) {
+  let chatAvailable;
+  try {
+    chatAvailable = await chatModel.findOne({ members: [req.body.senderId, req.body.receiverId] });
+  }catch(err) {
+    res.status(500).send({errMsg:'Internal server error'});
+    return;
+  }
+  if (chatAvailable) {
     res.status(200).send({ msg: 'Already chat exist' });
     return;
   }
@@ -15,7 +21,7 @@ const createChat = async (req, res) => {
     const result = await newChat.save();
     res.status(200).json(result);
   } catch (error) {
-    res.status(200).json(error);
+    res.status(500).json(error);
   }
 }
 //Find all chats of a specific user
