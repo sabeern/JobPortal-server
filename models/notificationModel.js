@@ -19,6 +19,8 @@ const notificationSchema = mongoose.Schema({
         required: true,
         default: 0
     }
-});
+},{
+    timestamps: true,
+  });
 
 module.exports = mongoose.model(process.env.NOTIFICATION_COLLECTION, notificationSchema);

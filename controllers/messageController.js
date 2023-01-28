@@ -1,3 +1,4 @@
+const chatModel = require("../models/chatModel");
 const MessageModel = require("../models/messageModel");
 //Inserting new messages sended by users
 const addMessage = async (req, res) => {
@@ -9,6 +10,11 @@ const addMessage = async (req, res) => {
   });
   try {
     const result = await message.save();
+    try {
+      await chatModel.findByIdAndUpdate(chatId,{updatedAt:Date.now()});
+    }catch(err) {
+      res.status(500).json(err);
+    }
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json(error);

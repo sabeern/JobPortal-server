@@ -19,6 +19,10 @@ const login = async (req, res) => {
         return;
     }
     if (user) {
+        if(user.blockStatus) {
+            res.status(401).send({errMsg:'Your account blocked, Please contact Job Solutions'});
+            return;
+        }
         const passwordCheck = await bcrypt.compare(password, user.password);
         if (passwordCheck) {
             const payload = {

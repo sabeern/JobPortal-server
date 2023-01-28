@@ -180,7 +180,7 @@ const getJobApplications = async (req, res) => {
         try {
                 const applicant = await appliedJobModel.aggregate([{ $match: { jobId } }, { $lookup: { from: process.env.JOB_COLLECTION, localField: 'jobId', foreignField: '_id', as: 'job' } },
                 { $unwind: '$job' }, { $lookup: { from: process.env.USER_COLLECTION, localField: 'userId', foreignField: '_id', as: 'user' } }, { $unwind: '$user' },
-                { $project: { 'user.password': 0 } }]);
+                { $project: { 'user.password': 0 } },{$sort:{appliedDate:-1}}]);
                 if (applicant) {
                         res.status(200).send({ applicant });
                 } else {
