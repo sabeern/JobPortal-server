@@ -14,13 +14,13 @@ const login = async (req, res) => {
     let user;
     try {
         user = await userModel.findOne({ userName });
-    }catch(err) {
-        res.status(500).send({errMsg:'Internal server error'});
+    } catch (err) {
+        res.status(500).send({ errMsg: 'Internal server error' });
         return;
     }
     if (user) {
-        if(user.blockStatus) {
-            res.status(401).send({errMsg:'Your account blocked, Please contact Job Solutions'});
+        if (user.blockStatus) {
+            res.status(401).send({ errMsg: 'Your account blocked, Please contact Job Solutions' });
             return;
         }
         const passwordCheck = await bcrypt.compare(password, user.password);

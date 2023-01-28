@@ -1,26 +1,26 @@
 const mongoose = require('mongoose');
 
 const notificationSchema = mongoose.Schema({
-    message:{
+    message: {
         type: String,
         required: true
     },
-    userId:{
+    userId: {
         type: String,
         required: true
     },
-    addedTime:{
+    addedTime: {
         type: Date,
         required: true,
         default: new Date()
     },
-    readStatus:{
+    readStatus: {
         type: Number,
         required: true,
         default: 0
     }
-},{
+}, {
     timestamps: true,
-  });
+});
 
 module.exports = mongoose.model(process.env.NOTIFICATION_COLLECTION, notificationSchema);

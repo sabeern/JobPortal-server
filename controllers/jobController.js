@@ -15,7 +15,12 @@ const getEmployerJobs = async (req, res) => {
         const decode = jwt.verify(token, process.env.JWT_SECRET);
         userId = decode.loginedUser.id;
         if (userId) {
-                userId = mongoose.Types.ObjectId(userId);
+                try {
+                        userId = mongoose.Types.ObjectId(userId);
+                } catch (err) {
+                        res.status(401).send({ errMsg: 'Data not found' });
+                        return;
+                }
                 try {
                         const employerJobs = await jobModel.aggregate([{ $match: { postedUser: userId, delFlag: 0 } },
                         { $lookup: { from: process.env.USER_COLLECTION, localField: 'postedUser', foreignField: '_id', as: 'user' } }, { $project: { 'user.password': 0 } }, { $unwind: '$user' },
@@ -48,9 +53,15 @@ const applyJob = async (req, res) => {
         const decode = jwt.verify(token, process.env.JWT_SECRET);
         userId = decode.loginedUser.id;
         if (userId) {
-                userId = mongoose.Types.ObjectId(userId);
                 let { jobId } = req.body;
-                jobId = mongoose.Types.ObjectId(jobId);
+                try {
+                        userId = mongoose.Types.ObjectId(userId);
+                        jobId = mongoose.Types.ObjectId(jobId);
+                } catch (err) {
+                        res.status(401).send({ errMsg: 'Data not found' });
+                        return;
+                }
+
                 const jobApplication = new appliedJobModel({
                         jobId, userId
                 });
@@ -72,6 +83,7 @@ const applyJob = async (req, res) => {
                         res.status(200).send({ msg: 'Applied for job successfully' });
                 } catch (err) {
                         res.status(401).send({ errMsg: 'Failed operation, Try later' });
+                        return;
                 }
         } else {
                 res.status(401).send({ errMsg: 'Validation failed' });
@@ -84,9 +96,14 @@ const checkJobStatus = async (req, res) => {
         const decode = jwt.verify(token, process.env.JWT_SECRET);
         userId = decode.loginedUser.id;
         if (userId) {
-                userId = mongoose.Types.ObjectId(userId);
                 let { jobId } = req.body;
-                jobId = mongoose.Types.ObjectId(jobId);
+                try {
+                        userId = mongoose.Types.ObjectId(userId);
+                        jobId = mongoose.Types.ObjectId(jobId);
+                } catch (err) {
+                        res.status(401).send({ errMsg: 'Data not found' });
+                        return;
+                }
                 try {
                         let appStatus = await appliedJobModel.findOne({ $and: [{ userId }, { jobId }] });
                         if (appStatus) {
@@ -105,7 +122,12 @@ const checkJobStatus = async (req, res) => {
 //Finding applied employees count for each job
 const findApplicantCount = async (req, res) => {
         let jobId = req.params.jobId;
-        jobId = mongoose.Types.ObjectId(jobId);
+        try {
+                jobId = mongoose.Types.ObjectId(jobId);
+        } catch (err) {
+                res.status(400).send({ errMsg: 'Data not found' });
+                return;
+        }
         try {
                 const appCount = await appliedJobModel.find({ jobId }).count();
                 res.status(200).send({ appCount });
@@ -175,11 +197,12 @@ const getJobApplications = async (req, res) => {
                 jobId = mongoose.Types.ObjectId(jobId);
         } catch (err) {
                 res.status(401).send({ errMsg: 'Job not found' });
+                return;
         }
         try {
                 const applicant = await appliedJobModel.aggregate([{ $match: { jobId } }, { $lookup: { from: process.env.JOB_COLLECTION, localField: 'jobId', foreignField: '_id', as: 'job' } },
                 { $unwind: '$job' }, { $lookup: { from: process.env.USER_COLLECTION, localField: 'userId', foreignField: '_id', as: 'user' } }, { $unwind: '$user' },
-                { $project: { 'user.password': 0 } },{$sort:{appliedDate:-1}}]);
+                { $project: { 'user.password': 0 } }, { $sort: { appliedDate: -1 } }]);
                 if (applicant) {
                         res.status(200).send({ applicant });
                 } else {
@@ -197,6 +220,7 @@ const getEmpProfileAndPost = async (req, res) => {
                 empId = mongoose.Types.ObjectId(empId);
         } catch (err) {
                 res.status(401).send({ errMsg: 'Employee not found' });
+                return;
         }
         try {
                 const empProfile = await userModel.findById(empId);
@@ -231,6 +255,7 @@ const getJobStatus = async (req, res) => {
                 empId = mongoose.Types.ObjectId(empId);
         } catch (err) {
                 res.status(401).send(err.message);
+                return;
         }
         try {
                 const jobDetails = await appliedJobModel.findOne({ jobId, userId: empId }, { applicationStatus: 1, tagStatus: 1 });
@@ -242,7 +267,12 @@ const getJobStatus = async (req, res) => {
 //Selecting employees and sending response mail to employees
 const updateJobAppStatus = async (req, res) => {
         let { status, applicationId, jobId, email, name } = req.body;
-        applicationId = mongoose.Types.ObjectId(applicationId);
+        try {
+                applicationId = mongoose.Types.ObjectId(applicationId);
+        } catch (err) {
+                res.status(401).send({ errMsg: 'Data not found' });
+                return;
+        }
         const userEmail = 'nsabeer007@gmail.com';
         let jobDetails;
         try {
@@ -270,8 +300,13 @@ const updateJobAppStatus = async (req, res) => {
 //Tagging job with chat
 const tagJob = async (req, res) => {
         let { jobId, empId } = req.body;
-        jobId = mongoose.Types.ObjectId(jobId);
-        newEmpId = mongoose.Types.ObjectId(empId);
+        try {
+                jobId = mongoose.Types.ObjectId(jobId);
+                newEmpId = mongoose.Types.ObjectId(empId);
+        } catch (err) {
+                res.status(401).send({ errMsg: 'Data not found' });
+                return;
+        }
         try {
                 await appliedJobModel.findOneAndUpdate({ jobId, userId: newEmpId }, { $push: { selectedApplicant: empId }, tagStatus: 1 });
                 await jobModel.findByIdAndUpdate(jobId, { $push: { selectedApplicant: empId } });
@@ -283,8 +318,13 @@ const tagJob = async (req, res) => {
 //Employee reporting issues about selected job
 const reportJob = async (req, res) => {
         let { jobIssue, jobId, userId } = req.body;
-        jobId = mongoose.Types.ObjectId(jobId);
-        userId = mongoose.Types.ObjectId(userId);
+        try {
+                jobId = mongoose.Types.ObjectId(jobId);
+                userId = mongoose.Types.ObjectId(userId);
+        } catch (err) {
+                res.status(401).send({ errMsg: 'Data not found' });
+                return;
+        }
         const jobReport = new reportJobModel({
                 issue: jobIssue, jobId, issuedUser: userId
         });
@@ -299,7 +339,12 @@ const reportJob = async (req, res) => {
 const deleteJob = async (req, res) => {
         try {
                 let jobId = req.params.jobId;
-                jobId = mongoose.Types.ObjectId(jobId);
+                try {
+                        jobId = mongoose.Types.ObjectId(jobId);
+                } catch (err) {
+                        res.status(401).send({ errMsg: 'Data not found' });
+                        return;
+                }
                 await jobModel.findByIdAndUpdate(jobId, { delFlag: 1 });
                 res.status(200).send({ msg: 'Job deleted successfully' });
         } catch (err) {

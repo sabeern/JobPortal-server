@@ -18,17 +18,19 @@ const createChat = async (req, res) => {
     } catch (error) {
       res.status(500).json(error);
     }
-  }catch(err) {
-    res.status(500).send({errMsg:'Internal server error'});
+  } catch (err) {
+    res.status(500).send({ errMsg: 'Internal server error' });
     return;
   }
 }
 //Find all chats of a specific user
 const userChats = async (req, res) => {
   try {
-    const chat = await ChatModel.aggregate([{$match:{
-      members: { $in: [req.params.userId] },
-    }},{$sort:{updatedAt:-1}}]);
+    const chat = await ChatModel.aggregate([{
+      $match: {
+        members: { $in: [req.params.userId] },
+      }
+    }, { $sort: { updatedAt: -1 } }]);
     res.status(200).json(chat);
   } catch (error) {
     res.status(500).json(error);
@@ -52,7 +54,7 @@ const getUser = async (req, res) => {
     const userDetails = await userModel.findById(userId);
     res.status(200).send({ userDetails });
   } catch (err) {
-    res.status(401).send({errMsg:'User not found'});
+    res.status(401).send({ errMsg: 'User not found' });
   }
 }
 

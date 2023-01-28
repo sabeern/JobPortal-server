@@ -12,8 +12,8 @@ const addMessage = async (req, res) => {
   try {
     const result = await message.save();
     try {
-      await chatModel.findByIdAndUpdate(chatId,{updatedAt:Date.now()});
-    }catch(err) {
+      await chatModel.findByIdAndUpdate(chatId, { updatedAt: Date.now() });
+    } catch (err) {
       res.status(500).json(err);
     }
     res.status(200).json(result);
@@ -25,13 +25,13 @@ const addMessage = async (req, res) => {
 const getMessages = async (req, res) => {
   const { chatId } = req.params;
   try {
-    if(req.headers['x-custom-header']) {
+    if (req.headers['x-custom-header']) {
       token = req.headers['x-custom-header'];
       const decode = jwt.verify(token, process.env.JWT_SECRET);
       let userId = decode.loginedUser.id;
-      await MessageModel.updateMany({chatId,senderId:{$ne:userId}},{$set:{readStatus:true}});
+      await MessageModel.updateMany({ chatId, senderId: { $ne: userId } }, { $set: { readStatus: true } });
     }
-  }catch(err) {
+  } catch (err) {
     res.status(500).json(err.message);
     return;
   }
@@ -42,13 +42,13 @@ const getMessages = async (req, res) => {
     res.status(500).json(error);
   }
 }
-const unreadMessageCount = async (req,res)=> {
+const unreadMessageCount = async (req, res) => {
   try {
     const chatId = req.params.chatId;
     const senderId = req.params.senderId;
-    const unReadCount = await MessageModel.find({chatId, readStatus:false,senderId:{$ne:senderId}}).count();
+    const unReadCount = await MessageModel.find({ chatId, readStatus: false, senderId: { $ne: senderId } }).count();
     res.status(200).json(unReadCount);
-  }catch(err) {
+  } catch (err) {
     res.status(500).json(err.message);
   }
 }

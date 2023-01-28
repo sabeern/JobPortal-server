@@ -11,7 +11,7 @@ const MessageSchema = new mongoose.Schema(
     text: {
       type: String,
     },
-    readStatus:{
+    readStatus: {
       type: Boolean,
       default: false
     }

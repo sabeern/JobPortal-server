@@ -9,7 +9,13 @@ const addPost = async (req, res) => {
     userId = decode.loginedUser.id;
     if (userId) {
         const { postDescription, postImage } = req.body;
-        const newUserId = mongoose.Types.ObjectId(userId);
+        let newUserId;
+        try {
+            newUserId = mongoose.Types.ObjectId(userId);
+        } catch (err) {
+            res.status(401).send({ errMsg: 'Data not found' });
+            return;
+        }
         const newPost = new postModel({
             postDescription, postImage, addedUser: newUserId
         });
@@ -34,8 +40,8 @@ const getEmployeePost = async (req, res) => {
             userId = mongoose.Types.ObjectId(userId);
             const employeePosts = await postModel.find({ addedUser: userId, delFlag: 0 }).sort({ addedDate: -1 });
             res.status(200).send({ employeePosts });
-        }catch(err) {
-            res.status(500).send({errMsg:'Internals server error'});
+        } catch (err) {
+            res.status(500).send({ errMsg: 'Internals server error' });
             return;
         }
     } else {
@@ -46,11 +52,16 @@ const getEmployeePost = async (req, res) => {
 const deletePost = async (req, res) => {
     try {
         let postId = req.params.postId;
-        postId = mongoose.Types.ObjectId(postId);
+        try {
+            postId = mongoose.Types.ObjectId(postId);
+        } catch (err) {
+            res.status(401).send({ errMsg: 'Data not found' });
+            return;
+        }
         await postModel.findByIdAndUpdate(postId, { delFlag: 1 });
         res.status(200).send({ msg: 'Post deleted successfully' });
-    }catch(err) {
-        res.status(500).send({errMsg:'Internal server error'});
+    } catch (err) {
+        res.status(500).send({ errMsg: 'Internal server error' });
     }
 }
 

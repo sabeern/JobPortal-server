@@ -35,7 +35,12 @@ const postJob = async (req, res) => {
     const decode = jwt.verify(token, process.env.JWT_SECRET);
     userId = decode.loginedUser.id;
     if (userId) {
-        userId = mongoose.Types.ObjectId(userId);
+        try {
+            userId = mongoose.Types.ObjectId(userId);
+        } catch (err) {
+            res.status(401).send({ errMsg: 'Data not found' });
+            return;
+        }
         const { jobTitle, salaryRange, requiredSkills, moreDetails } = req.body;
         const jobId = Math.ceil(Math.random() * 99999) + 10000;
         const newJob = new jobModel({
@@ -60,7 +65,12 @@ const updateCompanyDetails = async (req, res) => {
     if (userId) {
         try {
             const { companyName, companyLocation, postImage } = req.body;
-            mongoose.Types.ObjectId(userId);
+            try {
+                userId = mongoose.Types.ObjectId(userId);
+            } catch (err) {
+                res.status(401).send({ errMsg: 'Data not found' });
+                return;
+            }
             if (postImage) {
                 const companyLogo = postImage;
                 await userModel.findByIdAndUpdate(userId, { companyName, companyLocation, profileImage: companyLogo });
@@ -85,7 +95,12 @@ const updateEmployeeDetails = async (req, res) => {
     if (userId) {
         try {
             const { firstName, lastName, jobTitle, qualification, experience, moreDetails, contactNumber, resume } = req.body;
-            mongoose.Types.ObjectId(userId);
+            try {
+                userId = mongoose.Types.ObjectId(userId);
+            } catch (err) {
+                res.status(401).send({ errMsg: 'Data not found' });
+                return;
+            }
             if (resume) {
                 const employeeResume = resume;
                 await userModel.findByIdAndUpdate(userId, { firstName, lastName, jobTitle, qualification, experience, details: moreDetails, contactNumber, resume: employeeResume });
