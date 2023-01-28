@@ -66,7 +66,6 @@ const applyJob = async (req, res) => {
                                 });
                                 notification.save();
                         } catch (err) {
-                                console.log(err.message);
                                 res.status(500).send({ errMsg: 'Internal server error' });
                                 return;
                         }

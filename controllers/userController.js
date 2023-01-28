@@ -45,7 +45,6 @@ const postJob = async (req, res) => {
             await newJob.save();
             res.status(200).send({ msg: 'Job added successfully' });
         } catch (err) {
-            console.log(err.message);
             res.status(401).send({ errMsg: "Job posting failed" });
         }
     } else {
