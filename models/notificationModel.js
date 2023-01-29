@@ -14,6 +14,9 @@ const notificationSchema = mongoose.Schema({
         required: true,
         default: new Date()
     },
+    jobId:{
+        type:String
+    },
     readStatus: {
         type: Number,
         required: true,

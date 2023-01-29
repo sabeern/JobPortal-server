@@ -54,6 +54,7 @@ const applyJob = async (req, res) => {
         userId = decode.loginedUser.id;
         if (userId) {
                 let { jobId } = req.body;
+                let notificationJobId = jobId;
                 try {
                         userId = mongoose.Types.ObjectId(userId);
                         jobId = mongoose.Types.ObjectId(jobId);
@@ -73,7 +74,7 @@ const applyJob = async (req, res) => {
                                 const employeeDetails = await userModel.findById(userId);
                                 const message = `${employeeDetails.firstName + ' ' + employeeDetails.lastName} applied for job(Job Id: #${jobDetails.jobId})`;
                                 const notification = new notificationModel({
-                                        message, userId: employerDetails._id
+                                        message, userId: employerDetails._id, jobId:notificationJobId
                                 });
                                 notification.save();
                         } catch (err) {
@@ -370,7 +371,7 @@ const getNotification = async (req, res) => {
         const userId = req.params.id;
         try {
                 await notificationModel.updateMany({ readStatus: 1 });
-                const notifications = await notificationModel.find({ userId }).sort({ addedTime: -1 });
+                const notifications = await notificationModel.find({ userId }).sort({ createdAt: -1 });
                 res.status(200).send({ notifications });
         } catch (err) {
                 res.status(500).send({ errMsg: 'Internal server error' });
