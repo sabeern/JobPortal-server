@@ -52,5 +52,14 @@ const unreadMessageCount = async (req, res) => {
     res.status(500).json(err.message);
   }
 }
-
-module.exports = { addMessage, getMessages, unreadMessageCount };
+const updateReadMessage = async (req,res) => {
+  try {
+    const {senderId, chatId, receiverId} = req.body;
+    console.log(req.body)
+    await MessageModel.updateMany({ chatId, senderId, receiverId}, { $set: { readStatus: true } });
+    res.status(200).send({msg:'Updated status'});
+  }catch(err) {
+    res.status(500).send({errMsg:'Updation failed'});
+  }
+}
+module.exports = { addMessage, getMessages, unreadMessageCount, updateReadMessage };
