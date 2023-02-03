@@ -201,9 +201,19 @@ const getJobApplications = async (req, res) => {
                 return;
         }
         try {
+                let userId;
+                try {
+                        token = req.headers['x-custom-header'];
+                        const decode = jwt.verify(token, process.env.JWT_SECRET);
+                        userId = decode.loginedUser.id;
+                        userId = mongoose.Types.ObjectId(userId);
+                }catch(err) {
+                        res.status(401).send({errMsg:'user not found'});
+                        return;
+                }
                 const applicant = await appliedJobModel.aggregate([{ $match: { jobId } }, { $lookup: { from: process.env.JOB_COLLECTION, localField: 'jobId', foreignField: '_id', as: 'job' } },
-                { $unwind: '$job' }, { $lookup: { from: process.env.USER_COLLECTION, localField: 'userId', foreignField: '_id', as: 'user' } }, { $unwind: '$user' },
-                { $project: { 'user.password': 0 } }, { $sort: { appliedDate: -1 } }]);
+                { $unwind: '$job' }, {$match:{'job.postedUser':userId}}, { $lookup: { from: process.env.USER_COLLECTION, localField: 'userId', foreignField: '_id', as: 'user' } }, { $unwind: '$user' },
+                 { $project: { 'user.password': 0 } }, { $sort: { appliedDate: -1 } }]);
                 if (applicant) {
                         res.status(200).send({ applicant });
                 } else {
