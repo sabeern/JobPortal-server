@@ -5,7 +5,9 @@ const jwt = require('jsonwebtoken');
 
 //Login check function
 const login = async (req, res) => {
-    const { userName, password } = req.body;
+    let { userName, password } = req.body;
+    userName = userName.trim();
+    password = password.trim();
     const validateData = { userName, password };
     const response = formValidator.validateUser(validateData);
     if (response.error) {

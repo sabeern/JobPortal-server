@@ -3,7 +3,7 @@ const Joi = require('joi');
 const validateUser = (user) => {
         const JoiSchema = Joi.object({
                 password: Joi.string()
-                        .min(5)
+                        .min(1)
                         .max(30)
                         .required(),
                 userName: Joi.string()

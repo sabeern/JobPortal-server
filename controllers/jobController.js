@@ -24,7 +24,7 @@ const getEmployerJobs = async (req, res) => {
                 try {
                         const employerJobs = await jobModel.aggregate([{ $match: { postedUser: userId, delFlag: 0 } },
                         { $lookup: { from: process.env.USER_COLLECTION, localField: 'postedUser', foreignField: '_id', as: 'user' } }, { $project: { 'user.password': 0 } }, { $unwind: '$user' },
-                        { $sort: { postedDate: -1 } }]);
+                        { $sort: { createdAt: -1 } }]);
                         res.status(200).send({ employerJobs });
                 } catch (err) {
                         res.status(500).send({ errMsg: 'Internal server error' });
@@ -39,7 +39,7 @@ const getAllJobs = async (req, res) => {
         try {
                 const allJobs = await jobModel.aggregate([{ $match: { delFlag: 0, listingStatus: true } },
                 { $lookup: { from: process.env.USER_COLLECTION, localField: 'postedUser', foreignField: '_id', as: 'user' } }, { $project: { 'user.password': 0 } }, { $unwind: '$user' }
-                        , { $sort: { postedDate: -1 } }]);
+                        , { $sort: { createdAt: -1 } }]);
                 res.status(200).send({ allJobs });
         } catch (err) {
                 res.status(500).send({ errMsg: 'Internal server error' });
@@ -152,7 +152,7 @@ const searchJob = async (req, res) => {
                         searchResult = await jobModel.aggregate([{ $match: { jobTitle: { $regex: new RegExp('.*' + jobTitle + '.*', 'i') }, delFlag: 0, listingStatus: true } },
                         { $lookup: { from: process.env.USER_COLLECTION, localField: 'postedUser', foreignField: '_id', as: 'user' } },
                         { $match: { 'user.companyLocation': { $regex: new RegExp('.*' + jobLocation + '.*', 'i') } } }, { $project: { 'user.password': 0 } }, { $unwind: '$user' }
-                                , { $sort: { postedDate: -1 } }]);
+                                , { $sort: { createdAt: -1 } }]);
                 } catch (err) {
                         res.status(500).send({ errMsg: 'Internal server error' });
                         return;
@@ -161,7 +161,7 @@ const searchJob = async (req, res) => {
                 try {
                         searchResult = await jobModel.aggregate([{ $match: { jobTitle: { $regex: new RegExp('.*' + jobTitle + '.*', 'i') }, delFlag: 0, listingStatus: true } },
                         { $lookup: { from: process.env.USER_COLLECTION, localField: 'postedUser', foreignField: '_id', as: 'user' } },
-                        { $project: { 'user.password': 0 } }, { $unwind: '$user' }, { $sort: { postedDate: -1 } }]);
+                        { $project: { 'user.password': 0 } }, { $unwind: '$user' }, { $sort: { createdAt: -1 } }]);
                 } catch (err) {
                         res.status(500).send({ errMsg: 'internal server error' });
                         return;
@@ -170,7 +170,7 @@ const searchJob = async (req, res) => {
                 try {
                         searchResult = await jobModel.aggregate([{ $match: { delFlag: 0, listingStatus: true } }, { $lookup: { from: process.env.USER_COLLECTION, localField: 'postedUser', foreignField: '_id', as: 'user' } },
                         { $match: { 'user.companyLocation': { $regex: new RegExp('.*' + jobLocation + '.*', 'i') } } }, { $project: { 'user.password': 0 } }, { $unwind: '$user' },
-                        { $sort: { postedDate: -1 } }]);
+                        { $sort: { createdAt: -1 } }]);
                 } catch (err) {
                         res.status(500).send({ errMsg: 'Internal server error' });
                         return;
@@ -179,7 +179,7 @@ const searchJob = async (req, res) => {
                 try {
                         searchResult = await jobModel.aggregate([{ $match: { delFlag: 0, listingStatus: true } },
                         { $lookup: { from: process.env.USER_COLLECTION, localField: 'postedUser', foreignField: '_id', as: 'user' } }, { $project: { 'user.password': 0 } }, { $unwind: '$user' },
-                        { $sort: { postedDate: -1 } }]);
+                        { $sort: { createdAt: -1 } }]);
                 } catch (err) {
                         res.status(500).send({ errMsg: 'Internal server error' });
                         return;
@@ -310,7 +310,7 @@ const tagJob = async (req, res) => {
         }
         try {
                 await appliedJobModel.findOneAndUpdate({ jobId, userId: newEmpId }, { $push: { selectedApplicant: empId }, tagStatus: 1 });
-                await jobModel.findByIdAndUpdate(jobId, { $push: { selectedApplicant: empId } });
+                await jobModel.findByIdAndUpdate(jobId, { $addToSet: { selectedApplicant: empId } });
                 res.status(200).send({ msg: 'Job tagged' });
         } catch (err) {
                 res.status(401).send('Already taged');

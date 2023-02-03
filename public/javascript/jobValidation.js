@@ -2,7 +2,6 @@ const Joi = require('joi');
 const validateJobDetails = (jobDetails) => {
     const JoiSchema = Joi.object({
                 jobTitle: Joi.string()
-                        .min(3)
                         .required(),
                 salaryRange: Joi.string()
                         .required(),

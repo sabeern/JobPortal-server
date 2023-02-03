@@ -27,7 +27,9 @@ const transporter = nodemailer.createTransport({
 });
 //After checking user exist, sending otp to user
 const signup = async (req, res) => {
-  const { userName, userType, password } = req.body;
+  let { userName, userType, password } = req.body;
+  userName = userName.trim();
+  password = password.trim();
   const validateData = { userName, password };
   const response = formValidator.validateUser(validateData);
   if (response.error) {

@@ -4,7 +4,9 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 //Login menu for employee and employer
 const login = async (req, res) => {
-    const { userName, password } = req.body;
+    let { userName, password } = req.body;
+    userName = userName.trim();
+    password = password.trim();
     const validateData = { userName, password };
     const response = formValidator.validateUser(validateData);
     if (response.error) {
