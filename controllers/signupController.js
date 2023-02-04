@@ -108,7 +108,7 @@ const forgotSendOtp = async (req, res) => {
   const Otp = Math.floor(1000 + Math.random() * 9999);
   const mailOptions = {
     from: process.env.SENDER_MAIL,
-    to: userEmail,
+    to: userName,
     subject: 'Job solutions email verification',
     html: `<p>use this code for Job Solutions email verification <b>${Otp}</b></p>`
   }
