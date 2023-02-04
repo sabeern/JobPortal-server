@@ -295,7 +295,7 @@ const updateJobAppStatus = async (req, res) => {
         const mailData = mailTemplate.statusMail(name, jobDetails[0], status);
         const mailOptions = {
                 from: process.env.SENDER_MAIL,
-                to: userEmail,
+                to: email,
                 subject: 'Job solutions application response',
                 html: mailData
         }
